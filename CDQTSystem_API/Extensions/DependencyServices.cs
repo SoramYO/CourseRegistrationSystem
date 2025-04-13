@@ -31,7 +31,9 @@ namespace CDQTSystem_API.Extensions
 				.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true).Build();
 
 			services.AddDbContext<UniversityDbContext>(options =>
-			options.UseSqlServer(CreateConnectionString(configuration)));
+				options.UseSqlServer(CreateConnectionString(configuration),
+					sqlServerOptions => sqlServerOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
+			);
 
 			services.AddScoped<DbContext>(provider => provider.GetService<UniversityDbContext>());
 			return services;
@@ -45,33 +47,18 @@ namespace CDQTSystem_API.Extensions
 
 		public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
 		{
-			// string firebaseCred = config.GetValue<string>("Authentication:FirebaseKey");
-			// // string firebaseCred = config.GetValue<string>("AIzaSyCFJOGAnHOQaWntVhN1a16QINIAjVpWaXI");
-			// FirebaseApp.Create(new AppOptions()
-			// {
-			//     Credential = GoogleCredential.FromJson(firebaseCred)
-			// }, "[DEFAULT]");
 			services.AddScoped<ICourseEvaluationService, CourseEvaluationService>();
 			services.AddScoped<ICourseOfferingService, CourseOfferingService>();
 			services.AddScoped<ICourseRegistrationService, CourseRegistrationService>();
 			services.AddScoped<ICourseService, CourseService>();
 			services.AddScoped<IDegreeAuditService, DegreeAuditService>();
 			services.AddScoped<IMidtermEvaluationService, MidtermEvaluationService>();
-			services.AddScoped<IMidtermEvaluationService, MidtermEvaluationService>();
-			//services.AddScoped<IRegistrationPeriodService, RegistrationPeriodService>();
+			services.AddScoped<IRegistrationPeriodService, RegistrationPeriodService>();
 			services.AddScoped<ISemesterService, SemesterService>();
 			services.AddScoped<IServiceRequestService, ServiceRequestService>();
 			services.AddScoped<IStudentsService, StudentsService>();
-			//services.AddScoped<ITuitionService, TuitionService>();
 			services.AddScoped<IUsersService, UsersService>();
-
-
-
-
-
-
-
-			services.AddScoped<ISemesterService, SemesterService>();
+			services.AddScoped<IProfessorService, ProfessorService>();
 
 			return services;
 		}
@@ -103,6 +90,7 @@ namespace CDQTSystem_API.Extensions
 					ValidateIssuer = true,
 					ValidAudience = audience,
 					ValidateAudience = true,
+					ValidateLifetime = true,
 					ValidateIssuerSigningKey = true,
 					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
 					ClockSkew = TimeSpan.Zero // (tuỳ chọn) giảm độ lệch thời gian khi xác thực token
